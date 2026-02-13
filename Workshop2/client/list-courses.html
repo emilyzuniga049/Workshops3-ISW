@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>List Courses</title>
+</head>
+<body>
+
+  <h2>All Courses</h2>
+
+  <button onclick="loadCourses()">Load Courses</button>
+
+  <ul id="courseList"></ul>
+
+  <script>
+    async function loadCourses() {
+      const response = await fetch('http://localhost:3001/course')
+      const courses = await response.json()
+
+      const list = document.getElementById('courseList')
+      list.innerHTML = ''
+
+      courses.forEach(course => {
+        const li = document.createElement('li')
+        li.textContent = course.name + " - " + course.credits + " credits"  
+        list.appendChild(li)
+      })
+    }
+  </script>
+
+</body>
+</html>
