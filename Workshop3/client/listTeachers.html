@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>List Teachers</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+<div class="container mt-4">
+
+  <h2>Teachers</h2>
+
+  <h5 class="mt-4">Edit Teacher</h5>
+
+  <input type="hidden" id="teacherId">
+
+  <div class="mb-2">
+    <input id="firstName" class="form-control">
+  </div>
+
+  <div class="mb-2">
+    <input id="lastName" class="form-control">
+  </div>
+
+  <div class="mb-2">
+    <input id="idNumber" class="form-control">
+  </div>
+
+  <div class="mb-2">
+    <input id="age" type="number" class="form-control">
+  </div>
+
+  <button id="updateBtn" class="btn btn-outline-dark mb-2" onclick="updateTeacher()">Update</button>
+
+  <hr>
+
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>ID Number</th>
+        <th>Age</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="teachersBody"></tbody>
+  </table>
+
+</div>
+
+<script>
+  const API = "http://localhost:3001";
+  const btn = document.getElementById("updateBtn");
+  btn.disabled = true;
+
+  async function loadTeachers() {
+    btn.disabled = true;
+
+    const res = await fetch(API + "/teacher");
+    const teachers = await res.json();
+
+    const body = document.getElementById("teachersBody");
+    body.innerHTML = "";
+
+    teachers.forEach(t => {
+      const row = `
+        <tr>
+          <td>${t.firstName}</td>
+          <td>${t.lastName}</td>
+          <td>${t.idNumber}</td>
+          <td>${t.age}</td>
+          <td>
+            <button class="btn btn-sm btn-outline-dark"
+              onclick="editTeacher('${t._id}')">Edit</button>
+
+            <button class="btn btn-sm btn-outline-dark"
+              onclick="deleteTeacher('${t._id}')">Delete</button>
+          </td>
+        </tr>
+      `;
+      body.innerHTML += row;
+    });
+  }
+
+  async function editTeacher(id) {
+    btn.disabled = false;
+
+    const res = await fetch(API + "/teacher?id=" + id);
+    const teacher = await res.json();
+
+    document.getElementById("teacherId").value = teacher._id;
+    document.getElementById("firstName").value = teacher.firstName;
+    document.getElementById("lastName").value = teacher.lastName;
+    document.getElementById("idNumber").value = teacher.idNumber;
+    document.getElementById("age").value = teacher.age;
+  }
+
+  async function updateTeacher() {
+    const id = document.getElementById("teacherId").value;
+
+    const firstName = document.getElementById("firstName").value;
+    const lastName = document.getElementById("lastName").value;
+    const idNumber = document.getElementById("idNumber").value;
+    const age = Number(document.getElementById("age").value);
+
+    await fetch(API + "/teacher?id=" + id, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ firstName, lastName, idNumber, age })
+    });
+
+    loadTeachers();
+  }
+
+  async function deleteTeacher(id) {
+    await fetch(API + "/teacher?id=" + id, {
+      method: "DELETE"
+    });
+
+    
+    loadTeachers();
+  }
+
+  loadTeachers();
+</script>
+
+</body>
+</html>
